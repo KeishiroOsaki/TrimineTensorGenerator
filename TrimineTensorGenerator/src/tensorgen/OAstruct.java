@@ -10,6 +10,7 @@ class OAstruct {
 		this.object = object; 
 		this.actor = actor;
 		this.value = value;
+		
 	}
 
 }
