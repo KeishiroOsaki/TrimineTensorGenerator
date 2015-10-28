@@ -15,11 +15,14 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.BoxLayout;
+import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
+import javax.swing.ListModel;
 
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -38,6 +41,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.border.LineBorder;
+
+import java.awt.Color;
 
 class TensorGenDialog {
 
@@ -47,8 +53,20 @@ class TensorGenDialog {
 	private JPasswordField pwdPassword;
 	private JTextField txtFilePath;
 	private JTextField txtTablename;
-	private JTextField textField;
-	private JTextField textField_1;
+	private JTextField textStartPeriod;
+	private JTextField textEndPeriod;
+	private JComboBox comboBox_TimeUnit;
+	private JComboBox cbCombiCol;
+	private JComboBox cbTimeCol;
+	private JComboBox cbActCol;
+	private JComboBox cbObjCol;
+	private JRadioButton radioButtonCombiObj;
+	private JRadioButton radioButtonCombiActor;
+	private JRadioButton sqlRadioButton;
+	private JRadioButton csvRadioButton;
+	private JTable dtypeSelecTable;
+	private JTable combiGroupTable;
+	private DefaultListModel progresListmodel;
 
 	/**
 	 * Launch the application.
@@ -78,14 +96,14 @@ class TensorGenDialog {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(900, 300, 721, 743);
+		frame.setBounds(900, 300, 797, 749);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.X_AXIS));
 		
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1);
 		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("139px:grow"),
+				ColumnSpec.decode("224px:grow"),
 				ColumnSpec.decode("129px:grow"),
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
@@ -117,7 +135,11 @@ class TensorGenDialog {
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(24dlu;default)"),
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("max(19dlu;default)"),
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("max(103dlu;default):grow"),}));
 		
@@ -125,14 +147,14 @@ class TensorGenDialog {
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		panel_1.add(label, "1, 2");
 		
-		JRadioButton sqlRadioButton = new JRadioButton("SQL");
+		sqlRadioButton = new JRadioButton("SQL");
 		panel_1.add(sqlRadioButton, "2, 2, left, center");
 		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"H2 Database", "PostgreSQL"}));
 		panel_1.add(comboBox, "6, 2, left, top");
 		
-		JRadioButton csvRadioButton = new JRadioButton("CSV");
+		csvRadioButton = new JRadioButton("CSV");
 		panel_1.add(csvRadioButton, "8, 2, left, center");
 		
 		ButtonGroup bgDataSrc = new ButtonGroup();
@@ -195,73 +217,113 @@ class TensorGenDialog {
 		
 		JLabel label_6 = new JLabel("組み合わせ値グループ設定");
 		panel_1.add(label_6, "8, 10, center, default");
-		JTable dtypeSelecTable = new JTable(tableModel);
-		dtypeSelecTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		dtypeSelecTable = new JTable(tableModel);
+		//dtypeSelecTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane scrollPaneHead = new JScrollPane(dtypeSelecTable);
-		//scrollPaneHead.add(dtypeSelecTable);
 		scrollPaneHead.setPreferredSize(new Dimension(135, 200));
 		
 		panel_1.add(scrollPaneHead, "1, 12, 1, 7, fill, fill");
 		//cbDtypeBox.setBorder(BorderFactory.createEmptyBorder());
 		
-		TableColumn col = dtypeSelecTable.getColumnModel().getColumn(1);
+		TableColumn colDataType = dtypeSelecTable.getColumnModel().getColumn(1);
+		JComboBox cbDtypeBox = new JComboBox(new String[] {"VARCHAR","DATE","TIMESTAMP","BIGINT"});
+		colDataType.setCellEditor(new DefaultCellEditor(cbDtypeBox));
 		
 		JLabel label_2 = new JLabel("オブジェクト");
 		panel_1.add(label_2, "2, 12, right, default");
 		
-		JComboBox comboBox_1 = new JComboBox();
-		panel_1.add(comboBox_1, "6, 12, fill, default");
+		cbObjCol = new JComboBox();
+		panel_1.add(cbObjCol, "6, 12, fill, default");
 		
-		JScrollPane scrollPane = new JScrollPane();
-		panel_1.add(scrollPane, "8, 12, 1, 7, fill, fill");
+		String[] columnNames_combi = {"値", "グループ"};
+		DefaultTableModel tableModel_combi = new DefaultTableModel(columnNames_combi, 0);
+		
+		combiGroupTable = new JTable(tableModel_combi);
+		
+		JScrollPane scrollPaneCombiGroup = new JScrollPane(combiGroupTable);
+		panel_1.add(scrollPaneCombiGroup, "8, 12, 1, 7, fill, fill");
+		
+		combiGroupTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JComboBox(new String[] {"(not use)","A","B","C","D","E","F","G","H","I","J"})));
 		
 		JLabel label_3 = new JLabel("アクター");
 		panel_1.add(label_3, "2, 14, right, default");
 		
-		JComboBox comboBox_2 = new JComboBox();
-		panel_1.add(comboBox_2, "6, 14, fill, default");
+		cbActCol = new JComboBox();
+		panel_1.add(cbActCol, "6, 14, fill, default");
 		
 		JLabel label_4 = new JLabel("時間");
 		panel_1.add(label_4, "2, 16, right, default");
 		
-		JComboBox comboBox_3 = new JComboBox();
-		panel_1.add(comboBox_3, "6, 16, fill, default");
+		cbTimeCol = new JComboBox();
+		panel_1.add(cbTimeCol, "6, 16, fill, default");
 		
 		JLabel label_5 = new JLabel("組み合わせ用フィールド");
 		panel_1.add(label_5, "2, 18, right, default");
 		
-		JComboBox comboBox_4 = new JComboBox();
-		panel_1.add(comboBox_4, "6, 18, fill, default");
+		cbCombiCol = new JComboBox();
+		panel_1.add(cbCombiCol, "6, 18, fill, default");
 		
 		JLabel label_7 = new JLabel("組み合わせ先");
 		panel_1.add(label_7, "2, 20, right, default");
 		
-		JRadioButton radioButtonCombiObj = new JRadioButton("オブジェクト");
+		radioButtonCombiObj = new JRadioButton("オブジェクト");
 		panel_1.add(radioButtonCombiObj, "6, 20");
 		
-		JRadioButton radioButtonCombiActor = new JRadioButton("アクター");
+		radioButtonCombiActor = new JRadioButton("アクター");
 		panel_1.add(radioButtonCombiActor, "8, 20");
 		
 		ButtonGroup combiSaki = new ButtonGroup();
 		combiSaki.add(radioButtonCombiActor);
 		combiSaki.add(radioButtonCombiObj);
 		
-		JLabel lblPeriod = new JLabel("期間");
-		panel_1.add(lblPeriod, "1, 22, center, default");
+		JButton buttonCombiListRead = new JButton("組み合わせ先値リスト読み込み");
+		panel_1.add(buttonCombiListRead, "1, 22, 2, 1");
 		
-		textField = new JTextField();
-		panel_1.add(textField, "2, 22, fill, default");
-		textField.setColumns(10);
+		JButton buttonCombiGroupMapSet = new JButton("組み合わせグループセット");
+		panel_1.add(buttonCombiGroupMapSet, "6, 22, 3, 1");
+		
+		JLabel lblPeriod = new JLabel("期間(YYYY-MM-DD hh:mm:ss形式)");
+		panel_1.add(lblPeriod, "1, 24, center, default");
+		
+		textStartPeriod = new JTextField();
+		panel_1.add(textStartPeriod, "2, 24, fill, default");
+		textStartPeriod.setColumns(10);
 		
 		JLabel label_1 = new JLabel("~");
-		panel_1.add(label_1, "4, 22, right, default");
+		panel_1.add(label_1, "4, 24, right, default");
 		
-		textField_1 = new JTextField();
-		panel_1.add(textField_1, "6, 22, fill, default");
-		textField_1.setColumns(10);
+		textEndPeriod = new JTextField();
+		panel_1.add(textEndPeriod, "6, 24, fill, default");
+		textEndPeriod.setColumns(10);
 		
-		JComboBox cbDtypeBox = new JComboBox(new String[] {"VARCHAR","DATE","TIMESTAMP","BIGINT"});
-		col.setCellEditor(new DefaultCellEditor(cbDtypeBox));
+		JButton buttonCombiCancel = new JButton("組み合わせを解除");
+		panel_1.add(buttonCombiCancel, "8, 24");
+		
+		JLabel label_8 = new JLabel("時間の単位");
+		panel_1.add(label_8, "1, 26, center, default");
+		
+		comboBox_TimeUnit = new JComboBox();
+		comboBox_TimeUnit.setModel(new DefaultComboBoxModel(new String[] {"週", "日", "時"}));
+		panel_1.add(comboBox_TimeUnit, "2, 26, fill, default");
+		
+		JLabel label_stts = new JLabel("ステータス");
+		panel_1.add(label_stts, "1, 28, 4, 1, center, default");
+		
+		JButton buttonStart = new JButton("開始");
+		panel_1.add(buttonStart, "6, 28");
+		
+		JButton buttonExit = new JButton("途中終了");
+		panel_1.add(buttonExit, "8, 28");
+		
+		progresListmodel = new DefaultListModel();
+		JList progresList = new JList(progresListmodel);
+		
+		JScrollPane scrollPaneProgress = new JScrollPane();
+		scrollPaneProgress.setViewportBorder(new LineBorder(new Color(0, 0, 0)));
+		panel_1.add(scrollPaneProgress, "1, 30, 8, 1, fill, fill");
+		
+		
 		
 		
 		tableModel.addRow(new String[] {"time","Timestamp"});

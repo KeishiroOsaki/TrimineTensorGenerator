@@ -8,5 +8,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/TrimineTensorGenerator/jgoodies-common-1.8.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="h2-1.4.190.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://www.h2database.com/javadoc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
