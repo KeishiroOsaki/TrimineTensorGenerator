@@ -158,9 +158,9 @@ class TensorGenDialog {
 		bgDataSrc.add(csvRadioButton);
 		bgDataSrc.add(sqlRadioButton);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"H2 Database", "PostgreSQL"}));
-		panel_1.add(comboBox, "8, 2, left, top");
+		JComboBox cbSQLtype = new JComboBox();
+		cbSQLtype.setModel(new DefaultComboBoxModel(new String[] {"H2 Database", "PostgreSQL"}));
+		panel_1.add(cbSQLtype, "8, 2, left, top");
 		
 		JLabel lblNewLabel = new JLabel("SQLデータベース接続先：");
 		panel_1.add(lblNewLabel, "1, 4, center, default");
@@ -190,8 +190,8 @@ class TensorGenDialog {
 		JButton buttonFileRef = new JButton("CSVファイル参照");
 		panel_1.add(buttonFileRef, "6, 6");
 		
-		JButton btnSql = new JButton("SQLデータベースに接続");
-		panel_1.add(btnSql, "8, 6");
+		JButton btnSqlCon = new JButton("SQLデータベースに接続");
+		panel_1.add(btnSqlCon, "8, 6");
 		
 		JLabel lblSql = new JLabel("SQLテーブル名：");
 		panel_1.add(lblSql, "1, 8, center, default");
