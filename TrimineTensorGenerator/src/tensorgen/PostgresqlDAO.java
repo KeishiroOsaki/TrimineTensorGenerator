@@ -1,37 +1,30 @@
 package tensorgen;
 
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import javax.management.RuntimeErrorException;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
 
-public class H2dbDAO extends DataDAO {
+class PostgresqlDAO extends DataDAO {
 
 	@Override
 	void dbConnect(String uri, String username, String password) {
 		// TODO 自動生成されたメソッド・スタブ
-
 		try {
-			Class.forName("org.h2.Driver");
-			this.connection = DriverManager.getConnection("jdbc:h2:" + uri,
+			Class.forName("org.postgresql.Driver");
+			connection = DriverManager.getConnection("jdbc:postgresql:" + uri,
 					username, password);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
+
 	}
 
 	@Override
-	MultiKeyMap<String,Integer> sqlExecute(long time_n) {
+	MultiKeyMap<String, Integer> sqlExecute(long time_n) {
 		// TODO 自動生成されたメソッド・スタブ
-		//ArrayList<OAstruct> result_als = new ArrayList<OAstruct>();
-		 MultiKeyMap<String, Integer> map = new MultiKeyMap<>();
+		MultiKeyMap<String, Integer> map = new MultiKeyMap<>();
 		PreparedStatement pstmt;
 		int useTP = isUseTimeStamp();
 		try {
@@ -41,13 +34,13 @@ public class H2dbDAO extends DataDAO {
 
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?)/7 = ? group by 1,2 order by 1,2");
+								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60*24*7) = ? group by 1,2 order by 1,2");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?) = ? group by 1,2 order by 1,2");
+								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60*24) = ? group by 1,2 order by 1,2");
 					} else {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  ?) = ? group by 1,2 order by 1,2");
+								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60) = ? group by 1,2 order by 1,2");
 					}
 				} else {
 					pstmt = connection
@@ -65,21 +58,21 @@ public class H2dbDAO extends DataDAO {
 				 */
 				ResultSet rs = pstmt.executeQuery();
 				while (rs.next()) {
-					//result_als.add(new OAstruct(rs.getString(1), rs
-					//		.getString(2), rs.getInt(3)));
+					// result_als.add(new OAstruct(rs.getString(1), rs
+					// .getString(2), rs.getInt(3)));
 					map.put(rs.getString(1), rs.getString(2), rs.getInt(3));
 				}
 			} else {
 				if (useTP == 1) {
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ?, count(*) from ? where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?)/7 = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select ? , ? , ?, count(*) from ? where extract(epoch from ?)/(60*60*24*7) = ? group by 1,2,3 order by 1,2,3");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ? ,count(*) from ? where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?) = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select ? , ? , ? ,count(*) from ? where extract(epoch from ?)/(60*60*24) = ? group by 1,2,3 order by 1,2,3");
 					} else {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ? ,count(*) from ? where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  ?) = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select ? , ? , ? ,count(*) from ? where extract(epoch from ?)/(60*60) = ? group by 1,2,3 order by 1,2,3");
 					}
 				} else {
 					pstmt = connection
@@ -101,9 +94,9 @@ public class H2dbDAO extends DataDAO {
 
 					while (rs.next()) {
 						if (groupofCombiValue.containsKey(rs.getString(3))) {
-							//result_als.add(new OAstruct(rs.getString(1) + "_"
-							//		+ groupofCombiValue.get(rs.getString(3)),
-							//		rs.getString(2), rs.getInt(4)));
+							// result_als.add(new OAstruct(rs.getString(1) + "_"
+							// + groupofCombiValue.get(rs.getString(3)),
+							// rs.getString(2), rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
 									rs.getString(2), rs.getInt(4));
@@ -125,11 +118,11 @@ public class H2dbDAO extends DataDAO {
 				} else if (!combitoObject && combitoActor) {
 					while (rs.next()) {
 						if (groupofCombiValue.containsKey(rs.getString(3))) {
-							//result_als.add(new OAstruct(rs.getString(1), rs
-							//		.getString(2)
-							//		+ "_"
-							//		+ groupofCombiValue.get(rs.getString(3)),
-							//		rs.getInt(4)));
+							// result_als.add(new OAstruct(rs.getString(1), rs
+							// .getString(2)
+							// + "_"
+							// + groupofCombiValue.get(rs.getString(3)),
+							// rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
 									rs.getString(2), rs.getInt(4));
@@ -157,12 +150,13 @@ public class H2dbDAO extends DataDAO {
 			e.printStackTrace();
 		}
 
-		//return (OAstruct[]) result_als.toArray(new OAstruct[0]);
+		// return (OAstruct[]) result_als.toArray(new OAstruct[0]);
 		return map;
 	}
 
 	@Override
 	long[] getTimeDistinctValues() {
+		// TODO 自動生成されたメソッド・スタブ
 		ArrayList<Long> timeList = new ArrayList<Long>();
 
 		PreparedStatement pstmt = null;
@@ -172,13 +166,13 @@ public class H2dbDAO extends DataDAO {
 			if (timeTP == 1) {
 				if (timeUnit == UNIT_IS_WEEK) {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?)/7 where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from ?)/(60*60*24*7) where ? between timestamp ? and timestamp ? order by 1");
 				} else if (timeUnit == UNIT_IS_DAY) {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , ?) where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from ?)/(60*60*24) where ? between timestamp ? and timestamp ? order by 1");
 				} else {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('hour',timestamp '1970-01-01 00:00:00' , ?) where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from ?)/(60*60) where ? between timestamp ? and timestamp ? order by 1");
 				}
 				pstmt.setString(1, timeColumnName);
 				pstmt.setString(2, timeColumnName);
@@ -214,37 +208,4 @@ public class H2dbDAO extends DataDAO {
 		return longArray;
 	}
 
-	void csvread(String fileName, String[] header, String[] dataType) {
-		if (header.length != dataType.length) {
-			new IllegalArgumentException("ヘッダーの長さとデータ・タイプの長さが違う");
-		} else {
-			StringBuilder sql = new StringBuilder();
-			sql.append("Create table tmp (");
-
-			int l = header.length;
-			String[] str = new String[l];
-			for (int i = 0; i < l; i++) {
-				str[i] = header[i] + " " + dataType[i];
-			}
-			sql.append(String.join(",", str));
-			sql.append(");");
-
-			int res;
-			try {
-				res = connection.createStatement()
-						.executeUpdate(sql.toString());
-
-				PreparedStatement pstmt = connection
-						.prepareStatement("insert into tmp select * from csvread(?);");
-
-				pstmt.setString(1, fileName);
-
-				res = pstmt.executeUpdate();
-				pstmt.close();
-			} catch (SQLException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
-		}
-	}
 }

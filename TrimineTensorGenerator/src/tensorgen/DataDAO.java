@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.collections4.map.MultiKeyMap;
+
 public abstract class DataDAO {
 
 	static final public int UNIT_IS_WEEK = 1;
@@ -31,7 +33,7 @@ public abstract class DataDAO {
 
 	abstract void dbConnect(String uri, String username, String password);
 
-	abstract OAstruct[] sqlExecute(long time_n);
+	abstract MultiKeyMap<String, Integer> sqlExecute(long time_n);
 
 	String[] getHeader() {
 		ArrayList<String> colList = new ArrayList<String>();
