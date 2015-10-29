@@ -177,7 +177,37 @@ public class H2dbDAO extends DataDAO {
 		return longArray;
 	}
 
-	void csvread(String[] dataType) {
-		
+	void csvread(String fileName, String[] header, String[] dataType) {
+		if (header.length != dataType.length) {
+			new IllegalArgumentException("ヘッダーの長さとデータ・タイプの長さが違う");
+		} else {
+			StringBuilder sql = new StringBuilder();
+			sql.append("Create table tmp (");
+
+			int l = header.length;
+			String[] str = new String[l];
+			for (int i = 0; i < l; i++) {
+				str[i] = header[i] + " " + dataType[i];
+			}
+			sql.append(String.join(",", str));
+			sql.append(");");
+
+			int res;
+			try {
+				res = connection.createStatement()
+						.executeUpdate(sql.toString());
+
+				PreparedStatement pstmt = connection
+						.prepareStatement("insert into tmp select * from csvread(?);");
+
+				pstmt.setString(1, fileName);
+
+				res = pstmt.executeUpdate();
+				pstmt.close();
+			} catch (SQLException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+		}
 	}
 }
