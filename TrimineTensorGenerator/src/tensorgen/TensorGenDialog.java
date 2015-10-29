@@ -147,19 +147,20 @@ class TensorGenDialog {
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		panel_1.add(label, "1, 2");
 		
+		csvRadioButton = new JRadioButton("CSV");
+		panel_1.add(csvRadioButton, "2, 2, left, center");
+		
+		
+		ButtonGroup bgDataSrc = new ButtonGroup();
+		
 		sqlRadioButton = new JRadioButton("SQL");
-		panel_1.add(sqlRadioButton, "2, 2, left, center");
+		panel_1.add(sqlRadioButton, "6, 2, left, center");
+		bgDataSrc.add(csvRadioButton);
+		bgDataSrc.add(sqlRadioButton);
 		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"H2 Database", "PostgreSQL"}));
-		panel_1.add(comboBox, "6, 2, left, top");
-		
-		csvRadioButton = new JRadioButton("CSV");
-		panel_1.add(csvRadioButton, "8, 2, left, center");
-		
-		ButtonGroup bgDataSrc = new ButtonGroup();
-		bgDataSrc.add(sqlRadioButton);
-		bgDataSrc.add(csvRadioButton);
+		panel_1.add(comboBox, "8, 2, left, top");
 		
 		JLabel lblNewLabel = new JLabel("SQLデータベース接続先：");
 		panel_1.add(lblNewLabel, "1, 4, center, default");
@@ -206,7 +207,6 @@ class TensorGenDialog {
 			}
 		});
 		panel_1.add(btngetHeader, "1, 10");
-		
 		
 		
 		String[] columnNames = {"列名", "データ型"};

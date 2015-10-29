@@ -14,6 +14,8 @@ class OAmatrixGenerator implements Runnable {
 	List<String> object;
 	List<String> actor;
 	DataDAO dbCon;
+	public StringBuilder status_sb = new StringBuilder();
+	public boolean processing = false;
 	
 	
 	OAmatrixGenerator(String outputFileName, long time_n, List<String> object,
@@ -30,8 +32,10 @@ class OAmatrixGenerator implements Runnable {
 	@Override
 	public void run() {
 		// TODO 自動生成されたメソッド・スタブ
+		processing = true;
+		int nowprogres = 0;
 		
-		
+		setStatus_sb(nowprogres);
 		
 		File file = new File(outputFileName);
 		try {
@@ -39,6 +43,8 @@ class OAmatrixGenerator implements Runnable {
 			filewriter.write(object.size() + " " + actor.size() + " 0\n");
 			
 			MultiKeyMap<String, Integer> res = dbCon.sqlExecute(time_n);
+			
+			
 			
 			for (int i = 0; i < object.size(); i++) {
 				int elenum = 0;
@@ -54,6 +60,9 @@ class OAmatrixGenerator implements Runnable {
 				ressb.insert(0, elenum);
 				ressb.append("1 1\n");
 				filewriter.write(ressb.toString());
+				nowprogres++;
+				setStatus_sb(nowprogres);
+				
 			}
 			
 			filewriter.close();
@@ -63,7 +72,21 @@ class OAmatrixGenerator implements Runnable {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
-		
+		processing=false;
+	}
+
+
+	/**
+	 * @param nowprogres
+	 */
+	private void setStatus_sb(int nowprogres) {
+		status_sb.delete(0, status_sb.length());
+		status_sb.append("TensorGen time_n = ");
+		status_sb.append(time_n);
+		status_sb.append(" ");
+		status_sb.append(nowprogres);
+		status_sb.append(" / ");
+		status_sb.append(object.size());
 	}
 
 }

@@ -24,6 +24,7 @@ public abstract class DataDAO {
 	protected String actorColumnName;
 	protected String combiColumnName;
 	protected Map<String, String> groupofCombiValue;
+
 	protected boolean combitoObject = false;
 	protected boolean combitoActor = false;
 	protected int timeUnit = 1;
@@ -105,6 +106,13 @@ public abstract class DataDAO {
 		this.combitoActor = false;
 	}
 
+	/**
+	 * @return groupofCombiValue
+	 */
+	Map<String, String> getGroupofCombiValue() {
+		return groupofCombiValue;
+	}
+	
 	void setGroupofCombiValue(Map<String, String> groupofCombiValue) {
 		this.groupofCombiValue = groupofCombiValue;
 	}
@@ -241,5 +249,19 @@ public abstract class DataDAO {
 	
 	String[] getObjectDistinctValues() {
 		return getDistinctValues(objectColumnName);
+	}
+
+	/**
+	 * @return combitoObject
+	 */
+	boolean isCombitoObject() {
+		return combitoObject && !combitoActor;
+	}
+
+	/**
+	 * @return combitoActor
+	 */
+	boolean isCombitoActor() {
+		return combitoActor && !combitoObject;
 	}
 }
