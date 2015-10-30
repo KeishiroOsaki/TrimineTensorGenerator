@@ -81,12 +81,15 @@ class OAmatrixGenerator implements Runnable {
 	 */
 	private void setStatus_sb(int nowprogres) {
 		status_sb.delete(0, status_sb.length());
-		status_sb.append("TensorGen time_n = ");
+		status_sb.append("TensorGen outputFileName = ");
+		status_sb.append(outputFileName);
+		status_sb.append(" time_n = ");
 		status_sb.append(time_n);
 		status_sb.append(" ");
 		status_sb.append(nowprogres);
 		status_sb.append(" / ");
 		status_sb.append(object.size());
+		System.out.println(status_sb);
 	}
 
 }

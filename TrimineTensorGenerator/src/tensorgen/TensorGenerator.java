@@ -230,8 +230,8 @@ public class TensorGenerator {
 			try {
 				fwcmb = new FileWriter(combiList, true);
 
-				for (Entry<String, String> men : (Entry<String, String>[]) combival
-						.entrySet().stream().sorted().toArray()) {
+				for (Entry<String, String> men : combival
+						.entrySet()) {
 					sbcmb.append("\"" + men.getKey() + "\",\"" + men.getValue()
 							+ "\"\n");
 				}

@@ -450,6 +450,22 @@ class TensorGenDialog {
 						tensorGenerator.setTimeUnit(comboBox_TimeUnit.getSelectedIndex()+1);
 						tensorGenerator.startGenrerateTensor();
 						label_stts.setText("テンソル生成を開始しました。完了するまでお待ち下さい。");
+						
+						Runnable progproj = new Runnable() {
+							
+							@Override
+							public void run() {
+								// TODO 自動生成されたメソッド・スタブ
+								while (true) {
+									for (OAmatrixGenerator oat : tensorGenerator.matgen) {
+										if (oat.processing==true && !progresListmodel.contains(oat.status_sb)) {
+											progresListmodel.addElement(oat.status_sb);
+										}
+									}
+								}
+							}
+						};
+						//progproj.run();
 					}
 				});
 				panel_1.add(buttonStart, "6, 26");
