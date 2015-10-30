@@ -41,9 +41,9 @@ public abstract class DataDAO {
 
 		try {
 			PreparedStatement stmt;
-			stmt = connection.prepareStatement("SELECT * from ?");
+			stmt = connection.prepareStatement("SELECT * from "+tableName);
 
-			stmt.setString(1, tableName);
+			//stmt.setString(1, tableName);
 
 			ResultSet rs = stmt.executeQuery();
 			//connection.commit();
@@ -67,9 +67,9 @@ public abstract class DataDAO {
 
 		try {
 			PreparedStatement stmt;
-			stmt = connection.prepareStatement("SELECT * from ?;");
+			stmt = connection.prepareStatement("SELECT * from "+tableName+";");
 
-			stmt.setString(1, tableName);
+			//stmt.setString(1, tableName);
 
 			ResultSet rs = stmt.executeQuery();
 			//connection.commit();
@@ -124,10 +124,10 @@ public abstract class DataDAO {
 
 		PreparedStatement pstmt;
 		try {
-			pstmt = connection.prepareStatement("select DISTINCT ? from ?;");
+			pstmt = connection.prepareStatement("select DISTINCT " + fieldName + " from "+ tableName +";");
 
-			pstmt.setString(1, fieldName);
-			pstmt.setString(2, tableName);
+			//pstmt.setString(1, fieldName);
+			//pstmt.setString(2, tableName);
 
 			ResultSet rs = pstmt.executeQuery();
 			//connection.commit();
@@ -161,10 +161,10 @@ public abstract class DataDAO {
 	int isUseTimeStamp() {
 		PreparedStatement pstmt;
 		try {
-			pstmt = connection.prepareStatement("select ? from ?;");
+			pstmt = connection.prepareStatement("select "+ timeColumnName +" from "+tableName+";");
 
-			pstmt.setString(1, timeColumnName);
-			pstmt.setString(2, tableName);
+			//pstmt.setString(1, timeColumnName);
+			//pstmt.setString(2, tableName);
 			ResultSet rs = pstmt.executeQuery();
 			//connection.commit();
 			ResultSetMetaData rmd = rs.getMetaData();

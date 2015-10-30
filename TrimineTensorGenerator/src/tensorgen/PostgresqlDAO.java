@@ -35,23 +35,23 @@ class PostgresqlDAO extends DataDAO {
 
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60*24*7) = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60*24*7) = ? group by 1,2 order by 1,2");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60*24) = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60*24) = ? group by 1,2 order by 1,2");
 					} else {
 						pstmt = connection
-								.prepareStatement("select ? , ? , count(*) from ? where extract(epoch from ?)/(60*60) = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60) = ? group by 1,2 order by 1,2");
 					}
 				} else {
 					pstmt = connection
-							.prepareStatement("select ? , ? , count(*) from ? where ? = ? group by 1,2 order by 1,2");
+							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where "+timeColumnName+" = ? group by 1,2 order by 1,2");
 				}
-				pstmt.setString(1, objectColumnName);
-				pstmt.setString(2, actorColumnName);
-				pstmt.setString(3, tableName);
-				pstmt.setString(4, timeColumnName);
-				pstmt.setLong(5, time_n);
+				//pstmt.setString(1, objectColumnName);
+				//pstmt.setString(2, actorColumnName);
+				//pstmt.setString(3, tableName);
+				//pstmt.setString(4, timeColumnName);
+				pstmt.setLong(1, time_n);
 				/*
 				 * pstmt.setString(6, objectColumnName); pstmt.setString(7,
 				 * actorColumnName); pstmt.setString(8, objectColumnName);
@@ -67,24 +67,24 @@ class PostgresqlDAO extends DataDAO {
 				if (useTP == 1) {
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ?, count(*) from ? where extract(epoch from ?)/(60*60*24*7) = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+", count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60*24*7) = ? group by 1,2,3 order by 1,2,3");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ? ,count(*) from ? where extract(epoch from ?)/(60*60*24) = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60*24) = ? group by 1,2,3 order by 1,2,3");
 					} else {
 						pstmt = connection
-								.prepareStatement("select ? , ? , ? ,count(*) from ? where extract(epoch from ?)/(60*60) = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where extract(epoch from "+timeColumnName+")/(60*60) = ? group by 1,2,3 order by 1,2,3");
 					}
 				} else {
 					pstmt = connection
-							.prepareStatement("select ? , ? , ? ,count(*) from ? where ? = ? group by 1,2,3 order by 1,2,3");
+							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where "+timeColumnName+" = ? group by 1,2,3 order by 1,2,3");
 				}
-				pstmt.setString(1, objectColumnName);
-				pstmt.setString(2, actorColumnName);
-				pstmt.setString(3, combiColumnName);
-				pstmt.setString(4, tableName);
-				pstmt.setString(5, timeColumnName);
-				pstmt.setLong(6, time_n);
+				//pstmt.setString(1, objectColumnName);
+				//pstmt.setString(2, actorColumnName);
+				//pstmt.setString(3, combiColumnName);
+				//pstmt.setString(4, tableName);
+				//pstmt.setString(5, timeColumnName);
+				pstmt.setLong(1, time_n);
 				/*
 				 * pstmt.setString(6, objectColumnName); pstmt.setString(7,
 				 * actorColumnName); pstmt.setString(8, objectColumnName);
@@ -167,25 +167,25 @@ class PostgresqlDAO extends DataDAO {
 			if (timeTP == 1) {
 				if (timeUnit == UNIT_IS_WEEK) {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from ?)/(60*60*24*7) where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24*7) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				} else if (timeUnit == UNIT_IS_DAY) {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from ?)/(60*60*24) where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				} else {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from ?)/(60*60) where ? between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				}
-				pstmt.setString(1, timeColumnName);
-				pstmt.setString(2, timeColumnName);
-				pstmt.setString(3, start);
-				pstmt.setString(4, end);
+				//pstmt.setString(1, timeColumnName);
+				//pstmt.setString(2, timeColumnName);
+				pstmt.setString(1, start);
+				pstmt.setString(2, end);
 			} else if (timeTP == 0) {
 				pstmt = connection
-						.prepareStatement("select distinct ? where ? between timestamp ? and timestamp ? order by 1");
-				pstmt.setString(1, timeColumnName);
-				pstmt.setString(2, timeColumnName);
-				pstmt.setLong(3, Long.parseLong(start));
-				pstmt.setLong(4, Long.parseLong(end));
+						.prepareStatement("select distinct "+timeColumnName+" where "+timeColumnName+" between ? and ? order by 1");
+				//pstmt.setString(1, timeColumnName);
+				//pstmt.setString(2, timeColumnName);
+				pstmt.setLong(1, Long.parseLong(start));
+				pstmt.setLong(2, Long.parseLong(end));
 			} else {
 				new Exception("isUseTimeStampがうまく行ってないよ");
 			}
