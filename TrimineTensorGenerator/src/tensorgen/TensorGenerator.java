@@ -1,16 +1,22 @@
 package tensorgen;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.map.MultiKeyMap;
+import org.h2.mvstore.DataUtils.MapEntry;
 
 public class TensorGenerator {
 	static final public int SQL_TYPE_H2DATABASE = 0;
@@ -27,6 +33,7 @@ public class TensorGenerator {
 
 	private String tblName;
 	public ArrayList<OAmatrixGenerator> matgen = new ArrayList<>();
+	private CSVLoader csvLoader;
 
 	public TensorGenerator(int sqlType) {
 		// TODO 自動生成されたコンストラクター・スタブ
@@ -40,6 +47,14 @@ public class TensorGenerator {
 		default:
 			break;
 		}
+	}
+
+	public TensorGenerator(String csvfileName) {
+		csvLoader = new CSVLoader(csvfileName);
+	}
+
+	public CSVLoader getCSVLoader() {
+		return csvLoader;
 	}
 
 	public void setTableName(String tblName) {
@@ -90,20 +105,34 @@ public class TensorGenerator {
 		dbCon.setCombiCancel();
 	}
 
+	public void setDbCon(DataDAO dbCon) {
+		this.dbCon = dbCon;
+	}
+
 	public void startGenrerateTensor() {
-		String dir = "./out/";
-		String baseFileName = dir + "dat.t";
+		String dir = "./output/";
+		String baseFileName = dir + "tensor/dat.t";
 
 		long[] timeList = dbCon.getTimeDistinctValues();
 
-		ArrayList<String> objectList = new ArrayList<>();
-		ArrayList<String> actorList = new ArrayList<>();
+		List<String> objectList = new ArrayList<>();
+		List<String> actorList = new ArrayList<>();
+
+		FileWriter fwlist = null;
+		try {
+			fwlist = new FileWriter(dir + "list", true);
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+		StringBuilder sblist = new StringBuilder();
 
 		Map<String, String> combival = dbCon.getGroupofCombiValue();
 
 		if (dbCon.isCombitoObject()) {
 			for (String obj : dbCon.getObjectDistinctValues()) {
-				combival.values().stream().distinct().sorted().forEach((s) -> objectList.add(obj + "_" + s));
+				combival.values().stream().distinct().sorted().map((s) -> obj + "_" + s)
+						.forEach((s) -> objectList.add(s));
 			}
 			Collections.sort(objectList);
 			Arrays.stream(dbCon.getActorDistinctValues()).sorted().forEach((s) -> actorList.add(s));
@@ -123,10 +152,81 @@ public class TensorGenerator {
 		for (long time_n : timeList) {
 			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName + (time_n - timeList[0] + 1), time_n, objectList,
 					actorList, dbCon);
+			sblist.append(baseFileName + (time_n - timeList[0] + 1) + "\n");
 			matgen.add(tmp);
 			futures.add(exec.submit(tmp));
 		}
-		
+
+		try {
+			fwlist.write(sblist.toString());
+			sblist = null;
+			fwlist.close();
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+
+		File objectcsvList = new File(dir + "objectlist.csv");
+		File actorcsvList = new File(dir + "actorlist.csv");
+
+		FileWriter fwobj = null;
+		FileWriter fwact = null;
+		FileWriter fwcmb = null;
+		try {
+			fwobj = new FileWriter(objectcsvList, true);
+			fwact = new FileWriter(actorcsvList, true);
+
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+
+		StringBuilder sbobj = new StringBuilder();
+		StringBuilder sbact = new StringBuilder();
+		StringBuilder sbcmb = new StringBuilder();
+		for (int i = 1; i <= objectList.size(); i++) {
+			sbobj.append(i + ",\"" + objectList.get(i - 1) + "\"\n");
+		}
+		try {
+			fwobj.write(sbobj.toString());
+			sbobj = null;
+			fwobj.close();
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+
+		for (int i = 1; i <= actorList.size(); i++) {
+			sbact.append(i + ",\"" + actorList.get(i - 1) + "\"\n");
+		}
+		try {
+			fwact.write(sbact.toString());
+			sbact = null;
+			fwact.close();
+		} catch (IOException e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+
+		File combiList = new File(dir + "combilist.csv");
+		if (dbCon.isCombitoActor() == false && dbCon.isCombitoObject() == false) {
+			try {
+				fwcmb = new FileWriter(combiList, true);
+
+				for (Entry<String, String> men : (Entry<String, String>[]) combival.entrySet().stream().sorted()
+						.toArray()) {
+					sbcmb.append("\"" + men.getKey() + "\",\"" + men.getValue() + "\"\n");
+				}
+
+				fwcmb.write(sbcmb.toString());
+				sbcmb = null;
+				fwcmb.close();
+			} catch (IOException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
+		}
+
 		for (Future<?> future : futures) {
 			try {
 				future.get();
