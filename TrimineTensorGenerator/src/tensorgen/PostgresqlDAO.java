@@ -167,13 +167,13 @@ class PostgresqlDAO extends DataDAO {
 			if (timeTP == 1) {
 				if (timeUnit == UNIT_IS_WEEK) {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24*7) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24*7) from "+tableName+" where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				} else if (timeUnit == UNIT_IS_DAY) {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60*24) from "+tableName+" where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				} else {
 					pstmt = connection
-							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60) where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct extract(epoch from "+timeColumnName+")/(60*60) from "+tableName+" where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
 				}
 				//pstmt.setString(1, timeColumnName);
 				//pstmt.setString(2, timeColumnName);
@@ -181,7 +181,7 @@ class PostgresqlDAO extends DataDAO {
 				pstmt.setString(2, end);
 			} else if (timeTP == 0) {
 				pstmt = connection
-						.prepareStatement("select distinct "+timeColumnName+" where "+timeColumnName+" between ? and ? order by 1");
+						.prepareStatement("select distinct "+timeColumnName+" from "+tableName+" where "+timeColumnName+" between ? and ? order by 1");
 				//pstmt.setString(1, timeColumnName);
 				//pstmt.setString(2, timeColumnName);
 				pstmt.setLong(1, Long.parseLong(start));

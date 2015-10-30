@@ -43,11 +43,16 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.awt.Font;
 
 class TensorGenDialog {
 
@@ -76,6 +81,8 @@ class TensorGenDialog {
 	private CSVLoader csvLoader;
 	private DefaultTableModel tableModel;
 	private String[] header;
+	private DefaultTableModel tableModel_combi;
+	private JLabel label_stts;
 
 	/**
 	 * Launch the application.
@@ -192,6 +199,8 @@ class TensorGenDialog {
 				if (csvRadioButton.isSelected()) {
 					JFileChooser filechooser = new JFileChooser();
 					filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					FileFilter filter = new FileNameExtensionFilter("CSVファイル", "csv");
+					filechooser.addChoosableFileFilter(filter);
 
 					int selected = filechooser.showOpenDialog(buttonFileRef);
 					if (selected == JFileChooser.APPROVE_OPTION) {
@@ -199,6 +208,7 @@ class TensorGenDialog {
 						txtFilePath.setText(file.getPath());
 						tensorGenerator = new TensorGenerator(txtFilePath.getText());
 						csvLoader = tensorGenerator.getCSVLoader();
+						label_stts.setText("CSVファイルをオープン。「見出しを取得」してください。");
 					}
 				}
 			}
@@ -213,6 +223,7 @@ class TensorGenDialog {
 							.getSelectedIndex(), txtDburi.getText(),
 							txtUsername.getText(), String.valueOf(pwdPassword
 									.getPassword()));
+					label_stts.setText("SQLデータベースに接続しました。「DBからヘッダー情報を取得」してください。");
 				}
 			}
 		});
@@ -238,6 +249,7 @@ class TensorGenDialog {
 					String[] tmp = {hname,"VARCHAR"};
 					tableModel.addRow(tmp);
 				}
+				label_stts.setText("見出しを取得しました。適切なデータ型を設定し、「CSVをDBに読み込」ませてください。");
 			}
 		});
 		panel_1.add(btngetHeader, "1, 10");
@@ -255,6 +267,10 @@ class TensorGenDialog {
 				csvLoader.setDataType((String[]) list.toArray(new String[list.size()]));
 			tensorGenerator.setDbCon(csvLoader.createDB());
 			txtTablename.setText("TMP");
+			txtDburi.setText("./temp");
+			txtUsername.setText("sa");
+			pwdPassword.setText("");
+			label_stts.setText("CSVをDBに読み込みました。「DBからヘッダー情報を取得」してください。");
 			}
 			
 		});
@@ -265,11 +281,12 @@ class TensorGenDialog {
 			public void actionPerformed(ActionEvent e) {
 				tensorGenerator.setTableName(txtTablename.getText());
 				header = tensorGenerator.getHeader();
-				DefaultComboBoxModel<String> cBoxHeaderModel = new DefaultComboBoxModel<String>(header);
-				cbActCol.setModel(cBoxHeaderModel);
-				cbCombiCol.setModel(cBoxHeaderModel);
-				cbObjCol.setModel(cBoxHeaderModel);
-				cbTimeCol.setModel(cBoxHeaderModel);
+				//DefaultComboBoxModel<String> cBoxHeaderModel = new DefaultComboBoxModel<String>(header);
+				cbActCol.setModel(new DefaultComboBoxModel<String>(header));
+				cbCombiCol.setModel(new DefaultComboBoxModel<String>(header));
+				cbObjCol.setModel(new DefaultComboBoxModel<String>(header));
+				cbTimeCol.setModel(new DefaultComboBoxModel<String>(header));
+				label_stts.setText("ヘッダー情報を取得しました。必要に応じて組み合わせ値を取得・グループを設定し、期間にイベントの時間的な範囲を入力してください。");
 			}
 		});
 		panel_1.add(btnGetDbHeader, "6, 10");
@@ -297,7 +314,7 @@ class TensorGenDialog {
 		panel_1.add(cbObjCol, "6, 12, fill, default");
 
 		String[] columnNames_combi = { "値", "グループ" };
-		DefaultTableModel tableModel_combi = new DefaultTableModel(
+		tableModel_combi = new DefaultTableModel(
 				columnNames_combi, 0);
 
 		combiGroupTable = new JTable(tableModel_combi);
@@ -345,15 +362,52 @@ class TensorGenDialog {
 		combiSaki.add(radioButtonCombiObj);
 
 		JButton buttonCombiListRead = new JButton("組み合わせ先値リスト読み込み");
+		buttonCombiListRead.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tensorGenerator.setCombifieldName((String) cbCombiCol.getSelectedItem());
+
+				while (tableModel_combi.getRowCount() != 0) {
+					tableModel_combi.removeRow(0);
+				}
+				
+				for (String value : tensorGenerator.getCombiDistinctValues()) {
+					String[] tmp = {value,"(not use)"};
+					tableModel_combi.addRow(tmp);
+				}
+				label_stts.setText("組み合わせ先値を取得しました。「組み合わせグループをセット」してください。");
+			}
+		});
 		panel_1.add(buttonCombiListRead, "1, 22, 2, 1");
 
 		JButton buttonCombiGroupMapSet = new JButton("組み合わせグループセット");
+		buttonCombiGroupMapSet.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (radioButtonCombiActor.isSelected() || radioButtonCombiObj.isSelected()) {
+					Map<String,String> combimap = new HashMap<String,String>();
+					for (int i = 0; i < tableModel_combi.getRowCount(); i++) {
+						if (((String)tableModel_combi.getValueAt(i, 1)).equals("(not use)") == false) {
+							combimap.put((String)tableModel_combi.getValueAt(i, 0), (String)tableModel_combi.getValueAt(i, 1));
+						}
+					}
+					tensorGenerator.setCombiGroupMap(combimap);
+					if (radioButtonCombiObj.isSelected()) {
+						tensorGenerator.setCombiObject();
+					} else {
+						tensorGenerator.setCombiActor();
+					}
+					label_stts.setText("組み合わせ先グループをセットしました。期間を入力し、「開始」してください。");
+				} else {
+					label_stts.setText("どちらと組み合わせるのか、選択してください。");
+				}
+			}
+		});
 		panel_1.add(buttonCombiGroupMapSet, "6, 22, 3, 1");
 
-		JLabel lblPeriod = new JLabel("期間(YYYY-MM-DD hh:mm:ss形式)");
+		JLabel lblPeriod = new JLabel("期間");
 		panel_1.add(lblPeriod, "1, 24, center, default");
 
 		textStartPeriod = new JTextField();
+		textStartPeriod.setToolTipText("DBの時間フィールドのデータ型がTIMESTAMPならYYYY-MM-DD hh:mm:ss形式、数値なら%d形式で入力してください");
 		panel_1.add(textStartPeriod, "2, 24, fill, default");
 		textStartPeriod.setColumns(10);
 
@@ -361,10 +415,22 @@ class TensorGenDialog {
 		panel_1.add(label_1, "4, 24, right, default");
 
 		textEndPeriod = new JTextField();
+		textEndPeriod.setToolTipText("DBの時間フィールドのデータ型がTIMESTAMPならYYYY-MM-DD hh:mm:ss形式、数値なら%d形式で入力してください");
 		panel_1.add(textEndPeriod, "6, 24, fill, default");
 		textEndPeriod.setColumns(10);
 
 		JButton buttonCombiCancel = new JButton("組み合わせを解除");
+		buttonCombiCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					tensorGenerator.setCombiCancel();
+				} catch (Exception e2) {
+					// TODO: handle exception
+				}
+				combiSaki.clearSelection();
+				label_stts.setText("組み合わせを解除しました。必要なら再度「グループをセット」してください。");
+			}
+		});
 		panel_1.add(buttonCombiCancel, "8, 24");
 
 		JLabel label_8 = new JLabel("時間の単位");
@@ -374,15 +440,31 @@ class TensorGenDialog {
 		comboBox_TimeUnit.setModel(new DefaultComboBoxModel(new String[] { "週",
 				"日", "時" }));
 		panel_1.add(comboBox_TimeUnit, "2, 26, fill, default");
+		
+				JButton buttonStart = new JButton("開始");
+				buttonStart.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						tensorGenerator.setfieldName((String)cbObjCol.getSelectedItem(), (String)cbActCol.getSelectedItem(), (String)cbTimeCol.getSelectedItem());
+						
+						tensorGenerator.setTimeRange(textStartPeriod.getText(), textEndPeriod.getText());
+						tensorGenerator.setTimeUnit(comboBox_TimeUnit.getSelectedIndex()+1);
+						tensorGenerator.startGenrerateTensor();
+						label_stts.setText("テンソル生成を開始しました。完了するまでお待ち下さい。");
+					}
+				});
+				panel_1.add(buttonStart, "6, 26");
+		
+				JButton buttonExit = new JButton("途中終了");
+				buttonExit.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						
+					}
+				});
+				panel_1.add(buttonExit, "8, 26");
 
-		JLabel label_stts = new JLabel("ステータス");
-		panel_1.add(label_stts, "1, 28, 4, 1, center, default");
-
-		JButton buttonStart = new JButton("開始");
-		panel_1.add(buttonStart, "6, 28");
-
-		JButton buttonExit = new JButton("途中終了");
-		panel_1.add(buttonExit, "8, 28");
+		label_stts = new JLabel("ステータス");
+		label_stts.setFont(new Font("Lucida Grande", Font.PLAIN, 11));
+		panel_1.add(label_stts, "1, 28, 8, 1, center, default");
 
 		progresListmodel = new DefaultListModel();
 		JList progresList = new JList(progresListmodel);
@@ -392,6 +474,7 @@ class TensorGenDialog {
 				.setViewportBorder(new LineBorder(new Color(0, 0, 0)));
 		panel_1.add(scrollPaneProgress, "1, 30, 8, 1, fill, fill");
 
+		label_stts.setText("入力ソースを選択し、必要に応じて情報を入力・選択して、参照又は接続してください。");
 		// tableModel.addRow(new String[] {"time","Timestamp"});
 	}
 

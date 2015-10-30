@@ -118,6 +118,8 @@ public class TensorGenerator {
 		String baseFileName = dir + "tensor/dat.t";
 
 		delete(new File(dir));
+		
+		new File("output/tensor").mkdirs();
 
 		long[] timeList = dbCon.getTimeDistinctValues();
 
@@ -161,11 +163,13 @@ public class TensorGenerator {
 
 		ExecutorService exec = Executors.newFixedThreadPool(6);
 		ArrayList<Future<?>> futures = new ArrayList<>();
-		for (long time_n : timeList) {
+		long timemin = timeList[0];
+		long timemax = timeList[timeList.length-1];
+		for (long j = timemin; j <= timemax; j++) {
 			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName
-					+ (time_n - timeList[0] + 1), time_n, objectList,
+					+ (j - timemin + 1), j, objectList,
 					actorList, dbCon);
-			sblist.append(baseFileName + (time_n - timeList[0] + 1) + "\n");
+			sblist.append(baseFileName + (j - timemin + 1) + "\n");
 			matgen.add(tmp);
 			futures.add(exec.submit(tmp));
 		}

@@ -54,7 +54,7 @@ class OAmatrixGenerator implements Runnable {
 					Integer k = res.get(object.get(i), actor.get(j));
 					if (k != null) {
 						elenum++;
-						ressb.append(j + ":" + k + " ");
+						ressb.append(j+1 + ":" + k + " ");
 					}					
 				}
 				ressb.insert(0, elenum);

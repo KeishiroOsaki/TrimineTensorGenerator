@@ -175,33 +175,37 @@ public class H2dbDAO extends DataDAO {
 		try {
 			int timeTP = isUseTimeStamp();
 			if (timeTP == 1) {
+				connection.setAutoCommit(false);
 				if (timeUnit == UNIT_IS_WEEK) {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 from "+tableName+" where "+timeColumnName+" between timestamp '"+start+"' and timestamp '"+end+"' order by 1");
 				} else if (timeUnit == UNIT_IS_DAY) {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") from "+tableName+" where "+timeColumnName+" between timestamp '"+start+"' and timestamp '"+end+"' order by 1");
 				} else {
 					pstmt = connection
-							.prepareStatement("select distinct DATEDIFF('hour',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") where "+timeColumnName+" between timestamp ? and timestamp ? order by 1");
+							.prepareStatement("select distinct DATEDIFF('hour',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") from "+tableName+" where "+timeColumnName+" between timestamp '"+start+"' and timestamp '"+end+"' order by 1");
 				}
 				//pstmt.setString(1, timeColumnName);
 				//pstmt.setString(1, timeColumnName);
-				pstmt.setString(1, start);
-				pstmt.setString(2, end);
+				//pstmt.setString(1, start);
+				//pstmt.setString(2, end);
+				
 			} else if (timeTP == 0) {
+				connection.setAutoCommit(false);
 				pstmt = connection
-						.prepareStatement("select distinct "+timeColumnName+" where "+timeColumnName+" between ? and ? order by 1");
+						.prepareStatement("select distinct "+timeColumnName+" from "+tableName+" where "+timeColumnName+" between "+start+" and "+end+" order by 1");
 				//pstmt.setString(1, timeColumnName);
 				//pstmt.setString(2, timeColumnName);
-				pstmt.setLong(1, Long.parseLong(start));
-				pstmt.setLong(2, Long.parseLong(end));
+				//pstmt.setLong(1, Long.parseLong(start));
+				//pstmt.setLong(2, Long.parseLong(end));
 			} else {
 				new Exception("isUseTimeStampがうまく行ってないよ");
 			}
-
+			
 			ResultSet rs = pstmt.executeQuery();
-			//connection.commit();
+			connection.commit();
+			connection.setAutoCommit(true);
 
 			while (rs.next()) {
 				timeList.add(rs.getLong(1));
@@ -225,7 +229,8 @@ public class H2dbDAO extends DataDAO {
 			new IllegalArgumentException("ヘッダーの長さとデータ・タイプの長さが違う");
 		} else {
 
-			TensorGenerator.delete(new File("./tempmv.db"));
+			TensorGenerator.delete(new File("./temp.mv.db"));
+			TensorGenerator.delete(new File("./temp.trace.db"));
 			
 			dbConnect("./temp", "sa", "");
 			StringBuilder sql = new StringBuilder();
