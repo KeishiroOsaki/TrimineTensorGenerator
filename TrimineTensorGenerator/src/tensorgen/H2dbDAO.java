@@ -1,9 +1,11 @@
 package tensorgen;
 
+import java.io.File;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +23,7 @@ public class H2dbDAO extends DataDAO {
 			Class.forName("org.h2.Driver");
 			this.connection = DriverManager.getConnection("jdbc:h2:" + uri,
 					username, password);
+			//connection.setAutoCommit(false);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -28,10 +31,10 @@ public class H2dbDAO extends DataDAO {
 	}
 
 	@Override
-	MultiKeyMap<String,Integer> sqlExecute(long time_n) {
+	MultiKeyMap<String, Integer> sqlExecute(long time_n) {
 		// TODO 自動生成されたメソッド・スタブ
-		//ArrayList<OAstruct> result_als = new ArrayList<OAstruct>();
-		 MultiKeyMap<String, Integer> map = new MultiKeyMap<>();
+		// ArrayList<OAstruct> result_als = new ArrayList<OAstruct>();
+		MultiKeyMap<String, Integer> map = new MultiKeyMap<>();
 		PreparedStatement pstmt;
 		int useTP = isUseTimeStamp();
 		try {
@@ -64,9 +67,10 @@ public class H2dbDAO extends DataDAO {
 				 * pstmt.setString(9, actorColumnName);
 				 */
 				ResultSet rs = pstmt.executeQuery();
+				//connection.commit();
 				while (rs.next()) {
-					//result_als.add(new OAstruct(rs.getString(1), rs
-					//		.getString(2), rs.getInt(3)));
+					// result_als.add(new OAstruct(rs.getString(1), rs
+					// .getString(2), rs.getInt(3)));
 					map.put(rs.getString(1), rs.getString(2), rs.getInt(3));
 				}
 			} else {
@@ -97,13 +101,14 @@ public class H2dbDAO extends DataDAO {
 				 * pstmt.setString(9, actorColumnName);
 				 */
 				ResultSet rs = pstmt.executeQuery();
+				//connection.commit();
 				if (combitoObject && !combitoActor) {
 
 					while (rs.next()) {
 						if (groupofCombiValue.containsKey(rs.getString(3))) {
-							//result_als.add(new OAstruct(rs.getString(1) + "_"
-							//		+ groupofCombiValue.get(rs.getString(3)),
-							//		rs.getString(2), rs.getInt(4)));
+							// result_als.add(new OAstruct(rs.getString(1) + "_"
+							// + groupofCombiValue.get(rs.getString(3)),
+							// rs.getString(2), rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
 									rs.getString(2), rs.getInt(4));
@@ -125,11 +130,11 @@ public class H2dbDAO extends DataDAO {
 				} else if (!combitoObject && combitoActor) {
 					while (rs.next()) {
 						if (groupofCombiValue.containsKey(rs.getString(3))) {
-							//result_als.add(new OAstruct(rs.getString(1), rs
-							//		.getString(2)
-							//		+ "_"
-							//		+ groupofCombiValue.get(rs.getString(3)),
-							//		rs.getInt(4)));
+							// result_als.add(new OAstruct(rs.getString(1), rs
+							// .getString(2)
+							// + "_"
+							// + groupofCombiValue.get(rs.getString(3)),
+							// rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
 									rs.getString(2), rs.getInt(4));
@@ -157,7 +162,7 @@ public class H2dbDAO extends DataDAO {
 			e.printStackTrace();
 		}
 
-		//return (OAstruct[]) result_als.toArray(new OAstruct[0]);
+		// return (OAstruct[]) result_als.toArray(new OAstruct[0]);
 		return map;
 	}
 
@@ -196,6 +201,7 @@ public class H2dbDAO extends DataDAO {
 			}
 
 			ResultSet rs = pstmt.executeQuery();
+			//connection.commit();
 
 			while (rs.next()) {
 				timeList.add(rs.getLong(1));
@@ -218,6 +224,10 @@ public class H2dbDAO extends DataDAO {
 		if (header.length != dataType.length) {
 			new IllegalArgumentException("ヘッダーの長さとデータ・タイプの長さが違う");
 		} else {
+
+			TensorGenerator.delete(new File("./tempmv.db"));
+			
+			dbConnect("./temp", "sa", "");
 			StringBuilder sql = new StringBuilder();
 			sql.append("Create table tmp (");
 
@@ -233,14 +243,16 @@ public class H2dbDAO extends DataDAO {
 			try {
 				res = connection.createStatement()
 						.executeUpdate(sql.toString());
+				
 
-				PreparedStatement pstmt = connection
-						.prepareStatement("insert into tmp select * from csvread(?);");
+				Statement stmt = connection.createStatement();
 
-				pstmt.setString(1, fileName);
+				String sql2 = "insert into tmp select * from csvread( '"
+						+ fileName + "' );";
 
-				res = pstmt.executeUpdate();
-				pstmt.close();
+				res = stmt.executeUpdate(sql2);
+				//connection.commit();
+				stmt.close();
 			} catch (SQLException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();

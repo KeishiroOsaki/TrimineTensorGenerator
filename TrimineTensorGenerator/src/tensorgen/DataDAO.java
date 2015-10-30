@@ -41,11 +41,12 @@ public abstract class DataDAO {
 
 		try {
 			PreparedStatement stmt;
-			stmt = connection.prepareStatement("SELECT * from ?;");
+			stmt = connection.prepareStatement("SELECT * from ?");
 
 			stmt.setString(1, tableName);
 
 			ResultSet rs = stmt.executeQuery();
+			//connection.commit();
 			rs.getMetaData();
 
 			ResultSetMetaData rmd = rs.getMetaData();
@@ -71,6 +72,7 @@ public abstract class DataDAO {
 			stmt.setString(1, tableName);
 
 			ResultSet rs = stmt.executeQuery();
+			//connection.commit();
 			rs.getMetaData();
 
 			ResultSetMetaData rmd = rs.getMetaData();
@@ -128,6 +130,7 @@ public abstract class DataDAO {
 			pstmt.setString(2, tableName);
 
 			ResultSet rs = pstmt.executeQuery();
+			//connection.commit();
 
 			while (rs.next()) {
 				dList.add(rs.getString(1));
@@ -163,6 +166,7 @@ public abstract class DataDAO {
 			pstmt.setString(1, timeColumnName);
 			pstmt.setString(2, tableName);
 			ResultSet rs = pstmt.executeQuery();
+			//connection.commit();
 			ResultSetMetaData rmd = rs.getMetaData();
 			if (rmd.getColumnType(1) == java.sql.Types.DATE
 					|| rmd.getColumnType(1) == java.sql.Types.TIMESTAMP

@@ -35,7 +35,8 @@ public class TensorGenerator {
 	public ArrayList<OAmatrixGenerator> matgen = new ArrayList<>();
 	private CSVLoader csvLoader;
 
-	public TensorGenerator(int sqlType) {
+	public TensorGenerator(int sqlType, String uri, String username,
+			String password) {
 		// TODO 自動生成されたコンストラクター・スタブ
 		switch (sqlType) {
 		case SQL_TYPE_H2DATABASE:
@@ -47,6 +48,7 @@ public class TensorGenerator {
 		default:
 			break;
 		}
+		dbCon.dbConnect(uri, username, password);
 	}
 
 	public TensorGenerator(String csvfileName) {
@@ -66,7 +68,8 @@ public class TensorGenerator {
 		return dbCon.getHeader();
 	}
 
-	public void setfieldName(String objectColName, String actorColName, String timeColName) {
+	public void setfieldName(String objectColName, String actorColName,
+			String timeColName) {
 		dbCon.setTimeColumnName(timeColName);
 		System.out.println(dbCon.isUseTimeStamp());
 		dbCon.setActorColumnName(actorColName);
@@ -110,8 +113,11 @@ public class TensorGenerator {
 	}
 
 	public void startGenrerateTensor() {
+
 		String dir = "./output/";
 		String baseFileName = dir + "tensor/dat.t";
+
+		delete(new File(dir));
 
 		long[] timeList = dbCon.getTimeDistinctValues();
 
@@ -131,26 +137,33 @@ public class TensorGenerator {
 
 		if (dbCon.isCombitoObject()) {
 			for (String obj : dbCon.getObjectDistinctValues()) {
-				combival.values().stream().distinct().sorted().map((s) -> obj + "_" + s)
+				combival.values().stream().distinct().sorted()
+						.map((s) -> obj + "_" + s)
 						.forEach((s) -> objectList.add(s));
 			}
 			Collections.sort(objectList);
-			Arrays.stream(dbCon.getActorDistinctValues()).sorted().forEach((s) -> actorList.add(s));
+			Arrays.stream(dbCon.getActorDistinctValues()).sorted()
+					.forEach((s) -> actorList.add(s));
 		} else if (dbCon.isCombitoActor()) {
-			Arrays.stream(dbCon.getObjectDistinctValues()).sorted().forEach((s) -> objectList.add(s));
+			Arrays.stream(dbCon.getObjectDistinctValues()).sorted()
+					.forEach((s) -> objectList.add(s));
 			for (String actor : dbCon.getActorDistinctValues()) {
-				combival.values().stream().distinct().sorted().forEach((s) -> actorList.add(actor + "_" + s));
+				combival.values().stream().distinct().sorted()
+						.forEach((s) -> actorList.add(actor + "_" + s));
 			}
 			Collections.sort(actorList);
 		} else {
-			Arrays.stream(dbCon.getObjectDistinctValues()).sorted().forEach((s) -> objectList.add(s));
-			Arrays.stream(dbCon.getActorDistinctValues()).sorted().forEach((s) -> actorList.add(s));
+			Arrays.stream(dbCon.getObjectDistinctValues()).sorted()
+					.forEach((s) -> objectList.add(s));
+			Arrays.stream(dbCon.getActorDistinctValues()).sorted()
+					.forEach((s) -> actorList.add(s));
 		}
 
 		ExecutorService exec = Executors.newFixedThreadPool(6);
 		ArrayList<Future<?>> futures = new ArrayList<>();
 		for (long time_n : timeList) {
-			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName + (time_n - timeList[0] + 1), time_n, objectList,
+			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName
+					+ (time_n - timeList[0] + 1), time_n, objectList,
 					actorList, dbCon);
 			sblist.append(baseFileName + (time_n - timeList[0] + 1) + "\n");
 			matgen.add(tmp);
@@ -213,9 +226,10 @@ public class TensorGenerator {
 			try {
 				fwcmb = new FileWriter(combiList, true);
 
-				for (Entry<String, String> men : (Entry<String, String>[]) combival.entrySet().stream().sorted()
-						.toArray()) {
-					sbcmb.append("\"" + men.getKey() + "\",\"" + men.getValue() + "\"\n");
+				for (Entry<String, String> men : (Entry<String, String>[]) combival
+						.entrySet().stream().sorted().toArray()) {
+					sbcmb.append("\"" + men.getKey() + "\",\"" + men.getValue()
+							+ "\"\n");
 				}
 
 				fwcmb.write(sbcmb.toString());
@@ -236,5 +250,46 @@ public class TensorGenerator {
 			}
 		}
 		exec.shutdown();
+	}
+
+	static void delete(File f) {
+		/*
+		 * ファイルまたはディレクトリが存在しない場合は何もしない
+		 */
+		if (f.exists() == false) {
+			return;
+		}
+
+		if (f.isFile()) {
+			/*
+			 * ファイルの場合は削除する
+			 */
+			f.delete();
+
+		} else if (f.isDirectory()) {
+
+			/*
+			 * ディレクトリの場合は、すべてのファイルを削除する
+			 */
+
+			/*
+			 * 対象ディレクトリ内のファイルおよびディレクトリの一覧を取得
+			 */
+			File[] files = f.listFiles();
+
+			/*
+			 * ファイルおよびディレクトリをすべて削除
+			 */
+			for (int i = 0; i < files.length; i++) {
+				/*
+				 * 自身をコールし、再帰的に削除する
+				 */
+				delete(files[i]);
+			}
+			/*
+			 * 自ディレクトリを削除する
+			 */
+			f.delete();
+		}
 	}
 }

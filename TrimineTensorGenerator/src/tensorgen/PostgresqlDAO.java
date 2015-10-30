@@ -14,6 +14,7 @@ class PostgresqlDAO extends DataDAO {
 			Class.forName("org.postgresql.Driver");
 			connection = DriverManager.getConnection("jdbc:postgresql:" + uri,
 					username, password);
+			//connection.setAutoCommit(false);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -190,6 +191,7 @@ class PostgresqlDAO extends DataDAO {
 			}
 
 			ResultSet rs = pstmt.executeQuery();
+			//connection.commit();
 
 			while (rs.next()) {
 				timeList.add(rs.getLong(1));

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CSVLoader {
 
@@ -30,11 +32,23 @@ public class CSVLoader {
 			br.close();
 			res = header.split(",");
 			
+			
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			new RuntimeException("CSVのヘッダーが読めませんでした");
 		}
+		
+		for (int i = 0; i < res.length; i++) {
+			String string = res[i];
+			
+			Pattern p = Pattern.compile("^\"(.*)\"$");
+			Matcher m = p.matcher(string);
+			if (m.find()) {
+			res[i] = m.group(1);
+			}
+		}
+		
 		return res;
 		
 	}
