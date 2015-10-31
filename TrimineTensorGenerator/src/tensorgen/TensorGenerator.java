@@ -34,6 +34,7 @@ public class TensorGenerator {
 	private String tblName;
 	public ArrayList<OAmatrixGenerator> matgen = new ArrayList<>();
 	private CSVLoader csvLoader;
+	private ExecutorService exec = Executors.newFixedThreadPool(6);
 
 	public TensorGenerator(int sqlType, String uri, String username,
 			String password) {
@@ -112,11 +113,12 @@ public class TensorGenerator {
 		this.dbCon = dbCon;
 	}
 
-	public void startGenrerateTensor() {
+	public ArrayList<OAmatrixGenerator> startGenrerateTensor() {
 
 		String dir = "./output/";
 		String baseFileName = dir + "tensor/dat.t";
 
+		exec = Executors.newFixedThreadPool(6);
 		delete(new File(dir));
 		
 		new File("output/tensor").mkdirs();
@@ -161,7 +163,6 @@ public class TensorGenerator {
 					.forEach((s) -> actorList.add(s));
 		}
 
-		ExecutorService exec = Executors.newFixedThreadPool(6);
 		ArrayList<Future<?>> futures = new ArrayList<>();
 		long timemin = timeList[0];
 		long timemax = timeList[timeList.length-1];
@@ -202,7 +203,7 @@ public class TensorGenerator {
 		StringBuilder sbact = new StringBuilder();
 		StringBuilder sbcmb = new StringBuilder();
 		for (int i = 1; i <= objectList.size(); i++) {
-			sbobj.append(i + ",\"" + objectList.get(i - 1) + "\"\n");
+			sbobj.append(i + ",\"" + objectList.get(i - 1).replaceAll("\"", "\"\"") + "\"\n");
 		}
 		try {
 			fwobj.write(sbobj.toString());
@@ -214,7 +215,7 @@ public class TensorGenerator {
 		}
 
 		for (int i = 1; i <= actorList.size(); i++) {
-			sbact.append(i + ",\"" + actorList.get(i - 1) + "\"\n");
+			sbact.append(i + ",\"" + actorList.get(i - 1).replaceAll("\"", "\"\"") + "\"\n");
 		}
 		try {
 			fwact.write(sbact.toString());
@@ -226,13 +227,13 @@ public class TensorGenerator {
 		}
 
 		File combiList = new File(dir + "combilist.csv");
-		if (dbCon.isCombitoActor() == false && dbCon.isCombitoObject() == false) {
+		if (dbCon.isCombitoActor() == true || dbCon.isCombitoObject() == true) {
 			try {
 				fwcmb = new FileWriter(combiList, true);
 
 				for (Entry<String, String> men : combival
 						.entrySet()) {
-					sbcmb.append("\"" + men.getKey() + "\",\"" + men.getValue()
+					sbcmb.append("\"" + men.getKey().replaceAll("\"", "\"\"") + "\",\"" + men.getValue()
 							+ "\"\n");
 				}
 
@@ -245,6 +246,7 @@ public class TensorGenerator {
 			}
 		}
 
+		/*
 		for (Future<?> future : futures) {
 			try {
 				future.get();
@@ -253,7 +255,15 @@ public class TensorGenerator {
 				e.printStackTrace();
 			}
 		}
+		*/
 		exec.shutdown();
+		return matgen;
+	}
+	
+	public void processShutdown() {
+		synchronized (exec) {
+			exec.shutdownNow();
+		}
 	}
 
 	static void delete(File f) {

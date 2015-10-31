@@ -41,7 +41,7 @@ public abstract class DataDAO {
 
 		try {
 			PreparedStatement stmt;
-			stmt = connection.prepareStatement("SELECT * from "+tableName);
+			stmt = connection.prepareStatement("SELECT * from "+tableName + " where 1=0;");
 
 			//stmt.setString(1, tableName);
 

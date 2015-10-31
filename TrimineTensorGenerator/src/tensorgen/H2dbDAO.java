@@ -44,17 +44,17 @@ public class H2dbDAO extends DataDAO {
 
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 = ? group by "+objectColumnName+","+actorColumnName+" order by 1,2");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") = ? group by "+objectColumnName+","+actorColumnName+" order by 1,2");
 					} else {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  "+timeColumnName+") = ? group by 1,2 order by 1,2");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  "+timeColumnName+") = ? group by "+objectColumnName+","+actorColumnName+" order by 1,2");
 					}
 				} else {
 					pstmt = connection
-							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where "+timeColumnName+" = ? group by 1,2 order by 1,2");
+							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , count(*) from "+tableName+" where "+timeColumnName+" = ? group by "+objectColumnName+","+actorColumnName+" order by 1,2");
 				}
 				//pstmt.setString(1, objectColumnName);
 				//pstmt.setString(2, actorColumnName);
@@ -77,17 +77,17 @@ public class H2dbDAO extends DataDAO {
 				if (useTP == 1) {
 					if (timeUnit == UNIT_IS_WEEK) {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+", count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+", count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+")/7 = ? group by "+objectColumnName+","+actorColumnName+","+combiColumnName+" order by 1,2,3");
 					} else if (timeUnit == UNIT_IS_DAY) {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where DATEDIFF('day',timestamp '1970-01-01 00:00:00' , "+timeColumnName+") = ? group by "+objectColumnName+","+actorColumnName+","+combiColumnName+" order by 1,2,3");
 					} else {
 						pstmt = connection
-								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  "+timeColumnName+") = ? group by 1,2,3 order by 1,2,3");
+								.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where DATEDIFF('hour',timestamp '1970-01-01 00:00:00' ,  "+timeColumnName+") = ? group by "+objectColumnName+","+actorColumnName+","+combiColumnName+" order by 1,2,3");
 					}
 				} else {
 					pstmt = connection
-							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where "+timeColumnName+" = ? group by 1,2,3 order by 1,2,3");
+							.prepareStatement("select "+objectColumnName+" , "+actorColumnName+" , "+combiColumnName+" ,count(*) from "+tableName+" where "+timeColumnName+" = ? group by "+objectColumnName+","+actorColumnName+","+combiColumnName+" order by 1,2,3");
 				}
 				//pstmt.setString(1, objectColumnName);
 				//pstmt.setString(2, actorColumnName);
