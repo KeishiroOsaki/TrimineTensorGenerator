@@ -16,16 +16,18 @@ class OAmatrixGenerator implements Runnable {
 	DataDAO dbCon;
 	public StringBuilder status_sb = new StringBuilder();
 	public boolean processing = false;
+	private ProgressFrame progressFrame;
 	
 	
 	OAmatrixGenerator(String outputFileName, long time_n, List<String> object,
-			List<String> actor, DataDAO dbCon) {
+			List<String> actor, DataDAO dbCon, ProgressFrame progressFrame) {
 		
 		this.outputFileName = outputFileName;
 		this.time_n = time_n;
 		this.object = object;
 		this.actor = actor;
 		this.dbCon = dbCon;
+		this.progressFrame = progressFrame;
 	}
 
 	
@@ -34,11 +36,12 @@ class OAmatrixGenerator implements Runnable {
 		// TODO 自動生成されたメソッド・スタブ
 		processing = true;
 		int nowprogres = 0;
-		
+		progressFrame.addList(status_sb);
 		setStatus_sb(nowprogres);
 		
 		File file = new File(outputFileName);
 		try {
+			
 			FileWriter filewriter = new FileWriter(file, true);
 			filewriter.write(object.size() + " " + actor.size() + " 0\n");
 			
@@ -66,6 +69,8 @@ class OAmatrixGenerator implements Runnable {
 			}
 			
 			filewriter.close();
+			progressFrame.progvalIncrement();
+			progressFrame.removeList(status_sb);
 
 			
 		} catch (IOException e) {
@@ -89,7 +94,7 @@ class OAmatrixGenerator implements Runnable {
 		status_sb.append(nowprogres);
 		status_sb.append(" / ");
 		status_sb.append(object.size());
-		System.out.println(status_sb);
+		//System.out.println(status_sb);
 	}
 
 }

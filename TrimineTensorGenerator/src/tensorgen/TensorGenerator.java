@@ -162,14 +162,18 @@ public class TensorGenerator {
 			Arrays.stream(dbCon.getActorDistinctValues()).sorted()
 					.forEach((s) -> actorList.add(s));
 		}
+		
+		ProgressFrame progressFrame = new ProgressFrame();
+		progressFrame.setVisible(true);
 
 		ArrayList<Future<?>> futures = new ArrayList<>();
 		long timemin = timeList[0];
 		long timemax = timeList[timeList.length-1];
+		progressFrame.progressBar.setMaximum((int) (timemax-timemin)+1);
 		for (long j = timemin; j <= timemax; j++) {
 			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName
 					+ (j - timemin + 1), j, objectList,
-					actorList, dbCon);
+					actorList, dbCon,progressFrame);
 			sblist.append(baseFileName + (j - timemin + 1) + "\n");
 			matgen.add(tmp);
 			futures.add(exec.submit(tmp));
@@ -260,10 +264,8 @@ public class TensorGenerator {
 		return matgen;
 	}
 	
-	public void processShutdown() {
-		synchronized (exec) {
-			exec.shutdownNow();
-		}
+	public synchronized void processShutdown() {
+		exec.shutdownNow();
 	}
 
 	static void delete(File f) {
