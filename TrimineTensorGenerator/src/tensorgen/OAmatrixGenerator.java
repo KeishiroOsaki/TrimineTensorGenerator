@@ -9,6 +9,9 @@ import org.apache.commons.collections4.map.MultiKeyMap;
 
 class OAmatrixGenerator implements Runnable {
 	
+	private static final String SLASH = " / ";
+	private static final String TIME_N2 = " time_n = ";
+	private static final String TENSOR_GEN_OUTPUT_FILE_NAME = "TensorGen outputFileName = ";
 	String outputFileName;
 	long time_n;
 	List<String> object;
@@ -17,6 +20,10 @@ class OAmatrixGenerator implements Runnable {
 	public StringBuilder status_sb = new StringBuilder();
 	public boolean processing = false;
 	private ProgressFrame progressFrame;
+	int objectsize = 0;
+	private static final String terminalStr = "1 1\n";;
+	private static final String colone = ":";
+	private static final String space = " ";
 	
 	
 	OAmatrixGenerator(String outputFileName, long time_n, List<String> object,
@@ -28,6 +35,9 @@ class OAmatrixGenerator implements Runnable {
 		this.actor = actor;
 		this.dbCon = dbCon;
 		this.progressFrame = progressFrame;
+		this.objectsize = object.size();
+		
+		
 	}
 
 	
@@ -50,25 +60,14 @@ class OAmatrixGenerator implements Runnable {
 			
 			
 			for (int i = 0; i < object.size(); i++) {
-				int elenum = 0;
-				StringBuilder ressb = new StringBuilder(" ");
-				for (int j = 0; j < actor.size(); j++) {
-					
-					Integer k = res.get(object.get(i), actor.get(j));
-					if (k != null) {
-						elenum++;
-						ressb.append(j+1 + ":" + k + " ");
-					}					
-				}
-				ressb.insert(0, elenum);
-				ressb.append("1 1\n");
-				filewriter.write(ressb.toString());
+				oneLineGenerate(filewriter, res, i);
 				nowprogres++;
 				setStatus_sb(nowprogres);
 				
 			}
 			
 			filewriter.close();
+			res=null;
 			progressFrame.progvalIncrement();
 			progressFrame.removeList(status_sb);
 
@@ -81,19 +80,36 @@ class OAmatrixGenerator implements Runnable {
 	}
 
 
+	private void oneLineGenerate(FileWriter filewriter, MultiKeyMap<String, Integer> res, int i) throws IOException {
+		int elenum = 0;
+	    StringBuilder ressb = new StringBuilder(space);
+		for (int j = 0; j < actor.size(); j++) {
+			
+			Integer k = res.get(object.get(i), actor.get(j));
+			if (k != null) {
+				elenum++;
+				ressb.append(j+1 + colone + k + space);
+			}					
+		}
+		ressb.insert(0, elenum);
+		ressb.append(terminalStr);
+		filewriter.write(ressb.toString());
+	}
+
+
 	/**
 	 * @param nowprogres
 	 */
 	private void setStatus_sb(int nowprogres) {
 		status_sb.delete(0, status_sb.length());
-		status_sb.append("TensorGen outputFileName = ");
-		status_sb.append(outputFileName);
+		status_sb.append(TENSOR_GEN_OUTPUT_FILE_NAME + outputFileName + TIME_N2 + time_n + space + nowprogres + SLASH + objectsize);
+		/*status_sb.append(outputFileName);
 		status_sb.append(" time_n = ");
 		status_sb.append(time_n);
 		status_sb.append(" ");
 		status_sb.append(nowprogres);
 		status_sb.append(" / ");
-		status_sb.append(object.size());
+		status_sb.append(object.size());*/
 		//System.out.println(status_sb);
 	}
 

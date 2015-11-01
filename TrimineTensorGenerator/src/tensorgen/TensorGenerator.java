@@ -118,7 +118,7 @@ public class TensorGenerator {
 		String dir = "./output/";
 		String baseFileName = dir + "tensor/dat.t";
 
-		exec = Executors.newFixedThreadPool(6);
+		exec = Executors.newFixedThreadPool(8);
 		delete(new File(dir));
 		
 		new File("output/tensor").mkdirs();
@@ -170,6 +170,7 @@ public class TensorGenerator {
 		long timemin = timeList[0];
 		long timemax = timeList[timeList.length-1];
 		progressFrame.progressBar.setMaximum((int) (timemax-timemin)+1);
+		progressFrame.setTitle("進捗状況ウィンドウ　総実行数：" + (timemax-timemin)+1);
 		for (long j = timemin; j <= timemax; j++) {
 			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName
 					+ (j - timemin + 1), j, objectList,
