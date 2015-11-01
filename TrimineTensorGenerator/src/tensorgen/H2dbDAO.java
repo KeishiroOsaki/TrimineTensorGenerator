@@ -7,10 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import javax.management.RuntimeErrorException;
-
 import org.apache.commons.collections4.map.MultiKeyMap;
 
 public class H2dbDAO extends DataDAO {
@@ -244,9 +240,8 @@ public class H2dbDAO extends DataDAO {
 			sql.append(String.join(",", str));
 			sql.append(");");
 
-			int res;
 			try {
-				res = connection.createStatement()
+				connection.createStatement()
 						.executeUpdate(sql.toString());
 				
 
@@ -255,7 +250,7 @@ public class H2dbDAO extends DataDAO {
 				String sql2 = "insert into tmp select * from csvread( '"
 						+ fileName + "' );";
 
-				res = stmt.executeUpdate(sql2);
+				stmt.executeUpdate(sql2);
 				//connection.commit();
 				stmt.close();
 			} catch (SQLException e) {

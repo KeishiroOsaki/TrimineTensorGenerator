@@ -5,18 +5,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import org.apache.commons.collections4.map.MultiKeyMap;
-import org.h2.mvstore.DataUtils.MapEntry;
 
 public class TensorGenerator {
 	static final public int SQL_TYPE_H2DATABASE = 0;
@@ -34,7 +29,7 @@ public class TensorGenerator {
 	private String tblName;
 	public ArrayList<OAmatrixGenerator> matgen = new ArrayList<>();
 	private CSVLoader csvLoader;
-	private ExecutorService exec = Executors.newFixedThreadPool(6);
+	static private ExecutorService exec = Executors.newFixedThreadPool(8);
 
 	public TensorGenerator(int sqlType, String uri, String username,
 			String password) {

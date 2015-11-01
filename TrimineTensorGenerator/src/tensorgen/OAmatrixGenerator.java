@@ -59,10 +59,11 @@ class OAmatrixGenerator implements Runnable {
 			
 			
 			
-			for (int i = 0; i < object.size(); i++) {
+			for (int i = 0; i < object.size()  && !Thread.currentThread().isInterrupted()/* && !TensorGenerator.exec.isShutdown()*/; i++) {
 				oneLineGenerate(filewriter, res, i);
 				nowprogres++;
 				setStatus_sb(nowprogres);
+				//System.out.println(Thread.currentThread().isInterrupted());
 				
 			}
 			
@@ -102,14 +103,14 @@ class OAmatrixGenerator implements Runnable {
 	 */
 	private void setStatus_sb(int nowprogres) {
 		status_sb.delete(0, status_sb.length());
-		status_sb.append(TENSOR_GEN_OUTPUT_FILE_NAME + outputFileName + TIME_N2 + time_n + space + nowprogres + SLASH + objectsize);
-		/*status_sb.append(outputFileName);
-		status_sb.append(" time_n = ");
+		status_sb.append(TENSOR_GEN_OUTPUT_FILE_NAME/* + outputFileName + TIME_N2 + time_n + space + nowprogres + SLASH + objectsize*/);
+		status_sb.append(outputFileName);
+		status_sb.append(TIME_N2);
 		status_sb.append(time_n);
-		status_sb.append(" ");
+		status_sb.append(space);
 		status_sb.append(nowprogres);
-		status_sb.append(" / ");
-		status_sb.append(object.size());*/
+		status_sb.append(SLASH);
+		status_sb.append(objectsize);
 		//System.out.println(status_sb);
 	}
 

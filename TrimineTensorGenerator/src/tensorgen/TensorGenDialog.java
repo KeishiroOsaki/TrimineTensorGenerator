@@ -5,14 +5,8 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-import java.awt.GridLayout;
-
 import javax.swing.JPanel;
 
-import java.awt.FlowLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
@@ -23,8 +17,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
-import javax.swing.ListModel;
-
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormSpecs;
@@ -49,7 +41,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.Font;
@@ -474,7 +465,7 @@ class TensorGenDialog {
 				JButton buttonExit = new JButton("途中終了");
 				buttonExit.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						
+						tensorGenerator.processShutdown();
 					}
 				});
 				panel_1.add(buttonExit, "8, 26");
