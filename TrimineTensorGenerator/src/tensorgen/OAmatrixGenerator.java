@@ -24,6 +24,7 @@ class OAmatrixGenerator implements Runnable {
 	private static final String terminalStr = "1 1\n";;
 	private static final String colone = ":";
 	private static final String space = " ";
+	private boolean taskdone = false;
 	
 	
 	OAmatrixGenerator(String outputFileName, long time_n, List<String> object,
@@ -78,6 +79,7 @@ class OAmatrixGenerator implements Runnable {
 			e.printStackTrace();
 		}
 		processing=false;
+		setTaskdone(true);
 	}
 
 
@@ -112,6 +114,22 @@ class OAmatrixGenerator implements Runnable {
 		status_sb.append(SLASH);
 		status_sb.append(objectsize);
 		//System.out.println(status_sb);
+	}
+
+
+	/**
+	 * @return taskdone
+	 */
+	boolean isTaskdone() {
+		return taskdone;
+	}
+
+
+	/**
+	 * @param taskdone セットする taskdone
+	 */
+	void setTaskdone(boolean taskdone) {
+		this.taskdone = taskdone;
 	}
 
 }

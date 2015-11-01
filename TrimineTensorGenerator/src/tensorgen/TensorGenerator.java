@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,8 +33,9 @@ public class TensorGenerator {
 	private CSVLoader csvLoader;
 	static private ExecutorService exec = Executors.newFixedThreadPool(8);
 
-	public TensorGenerator(int sqlType, String uri, String username,
-			String password) {
+	public boolean done = false;
+
+	public TensorGenerator(int sqlType, String uri, String username, String password) {
 		// TODO 自動生成されたコンストラクター・スタブ
 		switch (sqlType) {
 		case SQL_TYPE_H2DATABASE:
@@ -64,8 +67,7 @@ public class TensorGenerator {
 		return dbCon.getHeader();
 	}
 
-	public void setfieldName(String objectColName, String actorColName,
-			String timeColName) {
+	public void setfieldName(String objectColName, String actorColName, String timeColName) {
 		dbCon.setTimeColumnName(timeColName);
 		System.out.println(dbCon.isUseTimeStamp());
 		dbCon.setActorColumnName(actorColName);
@@ -115,7 +117,7 @@ public class TensorGenerator {
 
 		exec = Executors.newFixedThreadPool(8);
 		delete(new File(dir));
-		
+
 		new File("output/tensor").mkdirs();
 
 		long[] timeList = dbCon.getTimeDistinctValues();
@@ -136,40 +138,33 @@ public class TensorGenerator {
 
 		if (dbCon.isCombitoObject()) {
 			for (String obj : dbCon.getObjectDistinctValues()) {
-				combival.values().stream().distinct().sorted()
-						.map((s) -> obj + "_" + s)
+				combival.values().stream().distinct().sorted().map((s) -> obj + "_" + s)
 						.forEach((s) -> objectList.add(s));
 			}
 			Collections.sort(objectList);
-			Arrays.stream(dbCon.getActorDistinctValues()).sorted()
-					.forEach((s) -> actorList.add(s));
+			Arrays.stream(dbCon.getActorDistinctValues()).sorted().forEach((s) -> actorList.add(s));
 		} else if (dbCon.isCombitoActor()) {
-			Arrays.stream(dbCon.getObjectDistinctValues()).sorted()
-					.forEach((s) -> objectList.add(s));
+			Arrays.stream(dbCon.getObjectDistinctValues()).sorted().forEach((s) -> objectList.add(s));
 			for (String actor : dbCon.getActorDistinctValues()) {
-				combival.values().stream().distinct().sorted()
-						.forEach((s) -> actorList.add(actor + "_" + s));
+				combival.values().stream().distinct().sorted().forEach((s) -> actorList.add(actor + "_" + s));
 			}
 			Collections.sort(actorList);
 		} else {
-			Arrays.stream(dbCon.getObjectDistinctValues()).sorted()
-					.forEach((s) -> objectList.add(s));
-			Arrays.stream(dbCon.getActorDistinctValues()).sorted()
-					.forEach((s) -> actorList.add(s));
+			Arrays.stream(dbCon.getObjectDistinctValues()).sorted().forEach((s) -> objectList.add(s));
+			Arrays.stream(dbCon.getActorDistinctValues()).sorted().forEach((s) -> actorList.add(s));
 		}
-		
+
 		ProgressFrame progressFrame = new ProgressFrame();
 		progressFrame.setVisible(true);
 
 		ArrayList<Future<?>> futures = new ArrayList<>();
 		long timemin = timeList[0];
-		long timemax = timeList[timeList.length-1];
-		progressFrame.progressBar.setMaximum((int) (timemax-timemin)+1);
-		progressFrame.setTitle("進捗状況ウィンドウ　総実行数：" + ((timemax-timemin)+1));
+		long timemax = timeList[timeList.length - 1];
+		progressFrame.progressBar.setMaximum((int) (timemax - timemin) + 1);
+		progressFrame.setTitle("進捗状況ウィンドウ　総実行数：" + ((timemax - timemin) + 1));
 		for (long j = timemin; j <= timemax; j++) {
-			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName
-					+ (j - timemin + 1), j, objectList,
-					actorList, dbCon,progressFrame);
+			OAmatrixGenerator tmp = new OAmatrixGenerator(baseFileName + (j - timemin + 1), j, objectList, actorList,
+					dbCon, progressFrame);
 			sblist.append(baseFileName + (j - timemin + 1) + "\n");
 			matgen.add(tmp);
 			futures.add(exec.submit(tmp));
@@ -231,10 +226,8 @@ public class TensorGenerator {
 			try {
 				fwcmb = new FileWriter(combiList, true);
 
-				for (Entry<String, String> men : combival
-						.entrySet()) {
-					sbcmb.append("\"" + men.getKey().replaceAll("\"", "\"\"") + "\",\"" + men.getValue()
-							+ "\"\n");
+				for (Entry<String, String> men : combival.entrySet()) {
+					sbcmb.append("\"" + men.getKey().replaceAll("\"", "\"\"") + "\",\"" + men.getValue() + "\"\n");
 				}
 
 				fwcmb.write(sbcmb.toString());
@@ -247,19 +240,22 @@ public class TensorGenerator {
 		}
 
 		/*
-		for (Future<?> future : futures) {
-			try {
-				future.get();
-			} catch (InterruptedException | ExecutionException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
-		}
-		*/
+		 * Thread futurejoin = new Thread( new Runnable() {
+		 * 
+		 * @Override public void run() { // TODO 自動生成されたメソッド・スタブ for (Future<?>
+		 * future : futures) { try { future.get(); } catch (InterruptedException
+		 * | ExecutionException e) { // TODO 自動生成された catch ブロック
+		 * e.printStackTrace(); } } } });
+		 */
+
 		exec.shutdown();
+		
+		Timer t = new Timer();
+		t.schedule(new stateUpdate(matgen), 0, 3000);
+		
 		return matgen;
 	}
-	
+
 	public synchronized void processShutdown() {
 		exec.shutdownNow();
 	}
@@ -302,6 +298,21 @@ public class TensorGenerator {
 			 * 自ディレクトリを削除する
 			 */
 			f.delete();
+		}
+	}
+
+	private class stateUpdate extends TimerTask {
+		private List<OAmatrixGenerator> matgen;
+
+		public stateUpdate(List<OAmatrixGenerator> matgen) {
+			// TODO 自動生成されたコンストラクター・スタブ
+			this.matgen = matgen;
+		}
+
+		public void run() {
+			if (matgen.stream().allMatch(s -> s.isTaskdone() == true)) {
+				done = true;
+			}
 		}
 	}
 }
