@@ -115,7 +115,7 @@ public class TensorGenerator {
 		String dir = "./output/";
 		String baseFileName = dir + "tensor/dat.t";
 
-		exec = Executors.newFixedThreadPool(8);
+		exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		delete(new File(dir));
 
 		new File("output/tensor").mkdirs();

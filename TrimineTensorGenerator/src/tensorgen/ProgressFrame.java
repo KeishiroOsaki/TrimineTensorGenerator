@@ -72,7 +72,7 @@ class ProgressFrame extends JFrame {
 		scrollPane.setViewportView(list);
 
 		Timer t = new Timer();
-		t.schedule(new Update(), 0, 50);
+		t.schedule(new Update(), 0, 25);
 	}
 
 	synchronized void progvalIncrement() {

@@ -41,6 +41,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.Font;
@@ -440,7 +441,7 @@ class TensorGenDialog {
 						tensorGenerator.setTimeRange(textStartPeriod.getText(), textEndPeriod.getText());
 						tensorGenerator.setTimeUnit(comboBox_TimeUnit.getSelectedIndex()+1);
 						ArrayList<OAmatrixGenerator> matgen = tensorGenerator.startGenrerateTensor();
-						label_stts.setText("テンソル生成を開始しました。完了するまでお待ち下さい。");
+						label_stts.setText("テンソル生成を開始しました。完了するまでお待ち下さい。 @" + new Date().toString());
 						
 						Runnable progproj = new Runnable() {
 							
@@ -466,6 +467,7 @@ class TensorGenDialog {
 				buttonExit.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						tensorGenerator.processShutdown();
+						label_stts.setText("処理を中断しました。");
 					}
 				});
 				panel_1.add(buttonExit, "8, 26");
