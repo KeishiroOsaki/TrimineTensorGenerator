@@ -31,6 +31,7 @@ public abstract class DataDAO {
 
 	protected String start;
 	protected String end;
+	protected Map<String, Integer> groupofcombiTimes;
 
 	abstract void dbConnect(String uri, String username, String password);
 
@@ -117,6 +118,11 @@ public abstract class DataDAO {
 	
 	void setGroupofCombiValue(Map<String, String> groupofCombiValue) {
 		this.groupofCombiValue = groupofCombiValue;
+	}
+
+	public void setCombiTimesMap(Map<String, Integer> combitimesMap) {
+		this.groupofcombiTimes = combitimesMap;
+		
 	}
 
 	protected String[] getDistinctValues(String fieldName) {

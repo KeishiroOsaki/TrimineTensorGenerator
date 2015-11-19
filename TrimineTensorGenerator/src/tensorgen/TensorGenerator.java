@@ -102,6 +102,11 @@ public class TensorGenerator {
 		dbCon.setGroupofCombiValue(map);
 	}
 
+	public void setCombiTimesMap(Map<String, Integer> combitimesMap) {
+		// TODO 自動生成されたメソッド・スタブ
+		dbCon.setCombiTimesMap(combitimesMap);
+	}
+
 	public void setCombiCancel() {
 		dbCon.setCombiCancel();
 	}

@@ -104,7 +104,7 @@ class TensorGenDialog {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(900, 300, 797, 749);
+		frame.setBounds(900, 300, 833, 524);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(
 				new BoxLayout(frame.getContentPane(), BoxLayout.X_AXIS));
@@ -305,7 +305,7 @@ class TensorGenDialog {
 		cbObjCol = new JComboBox();
 		panel_1.add(cbObjCol, "6, 12, fill, default");
 
-		String[] columnNames_combi = { "値", "グループ" };
+		String[] columnNames_combi = { "値", "グループ","発生数n倍" };
 		tableModel_combi = new DefaultTableModel(
 				columnNames_combi, 0);
 
@@ -363,7 +363,7 @@ class TensorGenDialog {
 				}
 				
 				for (String value : tensorGenerator.getCombiDistinctValues()) {
-					String[] tmp = {value,"(not use)"};
+					Object[] tmp = {value,"(not use)","1"};
 					tableModel_combi.addRow(tmp);
 				}
 				label_stts.setText("組み合わせ先値を取得しました。「組み合わせグループをセット」してください。");
@@ -376,12 +376,15 @@ class TensorGenDialog {
 			public void actionPerformed(ActionEvent e) {
 				if (radioButtonCombiActor.isSelected() || radioButtonCombiObj.isSelected()) {
 					Map<String,String> combimap = new HashMap<String,String>();
+					Map<String,Integer> combitimesMap = new HashMap<String, Integer>();
 					for (int i = 0; i < tableModel_combi.getRowCount(); i++) {
 						if (((String)tableModel_combi.getValueAt(i, 1)).equals("(not use)") == false) {
 							combimap.put((String)tableModel_combi.getValueAt(i, 0), (String)tableModel_combi.getValueAt(i, 1));
+							combitimesMap.put((String)tableModel_combi.getValueAt(i, 0), Integer.parseInt((String)tableModel_combi.getValueAt(i, 2)));
 						}
 					}
 					tensorGenerator.setCombiGroupMap(combimap);
+					tensorGenerator.setCombiTimesMap(combitimesMap);
 					if (radioButtonCombiObj.isSelected()) {
 						tensorGenerator.setCombiObject();
 					} else {
@@ -478,11 +481,6 @@ class TensorGenDialog {
 
 		progresListmodel = new DefaultListModel();
 		JList progresList = new JList(progresListmodel);
-
-		JScrollPane scrollPaneProgress = new JScrollPane();
-		scrollPaneProgress
-				.setViewportBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_1.add(scrollPaneProgress, "1, 30, 8, 1, fill, fill");
 
 		label_stts.setText("入力ソースを選択し、必要に応じて情報を入力・選択して、参照又は接続してください。");
 		// tableModel.addRow(new String[] {"time","Timestamp"});

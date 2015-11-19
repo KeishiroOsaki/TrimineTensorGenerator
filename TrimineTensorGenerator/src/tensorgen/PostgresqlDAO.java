@@ -100,19 +100,19 @@ class PostgresqlDAO extends DataDAO {
 							// rs.getString(2), rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
-									rs.getString(2), rs.getInt(4));
+									rs.getString(2)/*, rs.getInt(4)*/);
 							if (kekka == null) {
 								map.put(rs.getString(1)
 										+ "_"
 										+ groupofCombiValue
 												.get(rs.getString(3)),
-										rs.getString(2), rs.getInt(4));
+										rs.getString(2), rs.getInt(4)*groupofcombiTimes.get(rs.getString(3)));
 							} else {
 								map.put(rs.getString(1)
 										+ "_"
 										+ groupofCombiValue
 												.get(rs.getString(3)),
-										rs.getString(2), kekka + rs.getInt(4));
+										rs.getString(2), kekka + rs.getInt(4)*groupofcombiTimes.get(rs.getString(3)));
 							}
 						}
 					}
@@ -126,19 +126,19 @@ class PostgresqlDAO extends DataDAO {
 							// rs.getInt(4)));
 							Integer kekka = map.get(rs.getString(1) + "_"
 									+ groupofCombiValue.get(rs.getString(3)),
-									rs.getString(2), rs.getInt(4));
+									rs.getString(2)/*, rs.getInt(4)*/);
 							if (kekka == null) {
 								map.put(rs.getString(1)
 										+ "_"
 										+ groupofCombiValue
 												.get(rs.getString(3)),
-										rs.getString(2), rs.getInt(4));
+										rs.getString(2), rs.getInt(4)*groupofcombiTimes.get(rs.getString(3)));
 							} else {
 								map.put(rs.getString(1)
 										+ "_"
 										+ groupofCombiValue
 												.get(rs.getString(3)),
-										rs.getString(2), kekka + rs.getInt(4));
+										rs.getString(2), kekka + rs.getInt(4)*groupofcombiTimes.get(rs.getString(3)));
 							}
 						}
 					}
