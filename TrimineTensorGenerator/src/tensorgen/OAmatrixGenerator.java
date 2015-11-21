@@ -65,7 +65,7 @@ class OAmatrixGenerator implements Runnable {
 				// System.out.println(Thread.currentThread().isInterrupted());
 
 			}
-
+			filewriter.write(ressb.toString());
 			filewriter.close();
 			res = null;
 			progressFrame.progvalIncrement();
@@ -79,10 +79,11 @@ class OAmatrixGenerator implements Runnable {
 		setTaskdone(true);
 	}
 
-	private void oneLineGenerate(FileWriter filewriter, MultiKeyMap<String, Integer> res, int i, StringBuilder ressb)
+	private void oneLineGenerate(FileWriter filewriter, MultiKeyMap<String, Integer> res, int i, StringBuilder a_ressb)
 			throws IOException {
 		int elenum = 0;
 
+		StringBuilder ressb = new StringBuilder();
 		ressb.delete(0, ressb.length());
 		ressb.append(space);
 		for (int j = 0; j < actor.size(); j++) {
@@ -95,7 +96,8 @@ class OAmatrixGenerator implements Runnable {
 		}
 		ressb.insert(0, elenum);
 		ressb.append(terminalStr);
-		filewriter.write(ressb.toString());
+		a_ressb.append(ressb);
+		
 	}
 
 	/**
